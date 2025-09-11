@@ -1,0 +1,85 @@
+<!-- admin.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin - Digital E Gram Panchayat</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h2>Admin Panel</h2>
+    <div><button id="btnLogout">Logout</button></div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h3>Create New Service</h3>
+      <div class="form-row">
+        <input id="serviceTitle" placeholder="Service title">
+        <input id="serviceCode" placeholder="Service code (optional)">
+      </div>
+      <div class="form-row">
+        <textarea id="serviceDesc" placeholder="Service description"></textarea>
+      </div>
+      <button id="btnCreateService">Create Service</button>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>All Services</h3>
+      <div id="servicesList" class="services-grid"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Applications</h3>
+      <table class="table" id="appsTable">
+        <thead><tr><th>App ID</th><th>User</th><th>Service</th><th>Status</th><th>Updated</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { authInit, logout } from './js/auth.js';
+    import { createService, listenServices, deleteService, renderServiceCard } from './js/services.js';
+    import { listenApplications } from './js/applications.js';
+
+    authInit(); // protect route, redirect if not admin
+
+    document.getElementById('btnLogout').onclick = () => logout();
+    document.getElementById('btnCreateService').onclick = async () => {
+      const title = document.getElementById('serviceTitle').value.trim();
+      const description = document.getElementById('serviceDesc').value.trim();
+      if(!title) return alert('Title required');
+      await createService({ title, description });
+      document.getElementById('serviceTitle').value='';
+      document.getElementById('serviceDesc').value='';
+    }
+
+    // render services
+    listenServices((services) => {
+      const container = document.getElementById('servicesList');
+      container.innerHTML='';
+      services.forEach(s => container.appendChild(renderServiceCard(s, { showDelete: true })));
+    });
+
+    listenApplications((apps) => {
+      const tbody = document.querySelector('#appsTable tbody');
+      tbody.innerHTML='';
+      apps.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.id}</td><td>${a.userEmail || a.userId}</td><td>${a.serviceTitle}</td><td>${a.status}</td><td>${new Date(a.updatedAt?.toDate?.() || a.updatedAt || Date.now()).toLocaleString()}</td>`;
+        tbody.appendChild(tr);
+      });
+    });
+
+    // delegate delete clicks inside servicesList
+    document.getElementById('servicesList').addEventListener('click', async (e) => {
+      if(e.target.dataset.action === 'delete') {
+        const id = e.target.dataset.id;
+        if(confirm('Delete service?')) await deleteService(id);
+      }
+    });
+  </script>
+</body>
+</html>

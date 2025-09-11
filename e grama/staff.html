@@ -1,0 +1,57 @@
+<!-- staff.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Staff - Digital E Gram Panchayat</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h2>Staff Panel</h2>
+    <div><button id="btnLogout">Logout</button></div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h3>Assigned Applications</h3>
+      <table class="table" id="staffApps">
+        <thead><tr><th>App ID</th><th>User</th><th>Service</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { authInit, logout } from './js/auth.js';
+    import { listenApplicationsForStaff, updateApplicationStatus } from './js/applications.js';
+
+    authInit('staff'); // ensure staff role
+
+    document.getElementById('btnLogout').onclick = () => logout();
+
+    listenApplicationsForStaff((apps) => {
+      const tbody = document.querySelector('#staffApps tbody');
+      tbody.innerHTML='';
+      apps.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.id}</td><td>${a.userEmail || a.userId}</td><td>${a.serviceTitle}</td><td>${a.status}</td>
+          <td class="actions">
+            <button data-id="${a.id}" data-status="Approved">Approve</button>
+            <button data-id="${a.id}" data-status="Rejected">Reject</button>
+            <button data-id="${a.id}" data-status="Needs Info">Needs Info</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    });
+
+    document.querySelector('#staffApps').addEventListener('click', async (e) => {
+      if(e.target.dataset.id){
+        const id = e.target.dataset.id;
+        const status = e.target.dataset.status;
+        if(confirm(`Set application ${id} to ${status}?`)) await updateApplicationStatus(id, status);
+      }
+    });
+  </script>
+</body>
+</html>

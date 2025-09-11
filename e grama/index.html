@@ -1,0 +1,76 @@
+<!-- index.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Digital E Gram Panchayat</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h2>Digital E Gram Panchayat</h2>
+    <div id="nav">
+      <button onclick="goto('login')">Login</button>
+      <button onclick="goto('register')">Register</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="auth-area" class="card">
+      <!-- login -->
+      <div id="login" style="display:none">
+        <h3>Login</h3>
+        <div class="form-row">
+          <input id="loginEmail" placeholder="Email">
+          <input id="loginPassword" type="password" placeholder="Password">
+        </div>
+        <button id="btnLogin">Login</button>
+        <p class="small">Don't have an account? <a href="#" onclick="goto('register')">Register</a></p>
+      </div>
+
+      <!-- register -->
+      <div id="register" style="display:none">
+        <h3>Register</h3>
+        <div class="form-row">
+          <input id="regName" placeholder="Full name">
+        </div>
+        <div class="form-row">
+          <input id="regEmail" placeholder="Email">
+          <input id="regPassword" type="password" placeholder="Password">
+        </div>
+        <div class="form-row">
+          <select id="regRole">
+            <option value="user">User</option>
+            <option value="staff">Staff</option>
+            <!-- Admin role should be assigned manually via Firestore console -->
+          </select>
+          <input id="regPhone" placeholder="Phone (optional)">
+        </div>
+        <button id="btnRegister">Register</button>
+        <p class="small">Already registered? <a href="#" onclick="goto('login')">Login</a></p>
+      </div>
+
+      <!-- quick instructions -->
+      <div id="welcome" style="display:block">
+        <h3>Welcome</h3>
+        <p class="small">Use the register button to create an account. An admin must be created manually and given role 'admin' in Firestore users collection.</p>
+      </div>
+    </div>
+
+    <div class="footer card">
+      <p>Built with Firebase — replace config in firebaseConfig.js</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initApp } from './js/auth.js';
+    window.goto = (id) => {
+      document.getElementById('login').style.display='none';
+      document.getElementById('register').style.display='none';
+      document.getElementById('welcome').style.display='none';
+      document.getElementById(id).style.display='block';
+    }
+    initApp(); // initialize auth listeners and bind buttons
+  </script>
+</body>
+</html>
