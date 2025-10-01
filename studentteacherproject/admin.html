@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="topbar">
+    <span>Admin Panel</span>
+    <button id="logout">Logout</button>
+  </nav>
+
+  <main class="container">
+    <section class="card">
+      <h3>Add Teacher</h3>
+      <form id="add-teacher">
+        <label>Name <input id="t-name" required /></label>
+        <label>Department <input id="t-dept" /></label>
+        <label>Subjects (comma) <input id="t-subjects" /></label>
+        <button type="submit">Add Teacher</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>Teachers</h3>
+      <div id="teachers-list"></div>
+    </section>
+
+    <section class="card">
+      <h3>Pending Student Registrations</h3>
+      <div id="pending-students"></div>
+    </section>
+  </main>
+
+  <script type="module" src="init-firebase.js"></script>
+  <script type="module" src="db.js"></script>
+  <script type="module">
+    import { auth, onAuthStateChanged } from './auth-shared.js';
+    import { addTeacher, listTeachers, deleteTeacher, getPendingStudents, approveStudent } from './db.js';
+
+    const logout = document.getElementById('logout');
+    const tform = document.getElementById('add-teacher');
+    const teachersDiv = document.getElementById('teachers-list');
+    const pendingDiv = document.getElementById('pending-students');
+
+    onAuthStateChanged(user => {
+      if (!user) return window.location = 'index.html';
+      // simple client-side check; enforce server rules too
+      user.getIdTokenResult().then(tok => {
+        if (tok.claims.role !== 'admin') {
+          alert('Access denied');
+          auth.signOut();
+          window.location = 'index.html';
+        } else {
+          loadTeachers();
+          loadPending();
+        }
+      });
+    });
+
+    logout.onclick = async () => {
+      await auth.signOut();
+      window.location = 'index.html';
+    };
+
+    tform.onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('t-name').value.trim();
+      const dept = document.getElementById('t-dept').value.trim();
+      const subs = (document.getElementById('t-subjects').value || '').split(',').map(s=>s.trim()).filter(Boolean);
+      await addTeacher({ name, department: dept, subjects: subs });
+      tform.reset();
+      loadTeachers();
+    };
+
+    async function loadTeachers() {
+      const teachers = await listTeachers();
+      teachersDiv.innerHTML = '';
+      teachers.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<strong>${t.name}</strong> <div>${t.department}</div> <div>${t.subjects?.join(', ')}</div>
+                        <button class="del">Delete</button>`;
+        el.querySelector('.del').onclick = async () => {
+          if (confirm('Delete teacher?')) {
+            await deleteTeacher(t.id);
+            loadTeachers();
+          }
+        };
+        teachersDiv.appendChild(el);
+      });
+    }
+
+    async function loadPending() {
+      const pending = await getPendingStudents();
+      pendingDiv.innerHTML = '';
+      pending.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div>${p.name} — ${p.email}</div>
+                        <button class="approve">Approve</button>`;
+        el.querySelector('.approve').onclick = async () => {
+          await approveStudent(p.id);
+          loadPending();
+        };
+        pendingDiv.appendChild(el);
+      });
+    }
+  </script>
+</body>
+</html>

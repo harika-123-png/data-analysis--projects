@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="topbar">
+    <span id="user-greet">Hello</span>
+    <button id="logout">Logout</button>
+  </nav>
+
+  <main class="container">
+    <h2>Find Teacher & Book Appointment</h2>
+
+    <section class="card">
+      <label>Search teacher (name/department/subject)
+        <input id="teacher-search" placeholder="e.g. Smith, CS, Data Structures" />
+      </label>
+      <div id="teacher-results"></div>
+    </section>
+
+    <section class="card">
+      <h3>Your Appointments</h3>
+      <div id="my-appointments"></div>
+    </section>
+  </main>
+
+  <script type="module" src="init-firebase.js"></script>
+  <script type="module" src="db.js"></script>
+  <script type="module">
+    import { auth, onAuthStateChanged } from './auth-shared.js';
+    import { getTeacherList, bookAppointment, listenMyAppointments } from './db.js';
+
+    const userGreet = document.getElementById('user-greet');
+    const logoutBtn = document.getElementById('logout');
+    const searchInput = document.getElementById('teacher-search');
+    const resultsDiv = document.getElementById('teacher-results');
+    const apptsDiv = document.getElementById('my-appointments');
+
+    let currentUser = null;
+
+    onAuthStateChanged(user => {
+      if (!user) {
+        window.location = 'index.html';
+        return;
+      }
+      currentUser = user;
+      userGreet.textContent = `Hi ${user.displayName || user.email}`;
+      loadMyAppointments();
+    });
+
+    logoutBtn.onclick = async () => {
+      await auth.signOut();
+      window.location = 'index.html';
+    };
+
+    async function renderTeachers(q) {
+      resultsDiv.innerHTML = '<p>Searching...</p>';
+      const teachers = await getTeacherList(q);
+      if (!teachers.length) {
+        resultsDiv.innerHTML = '<p>No teachers found.</p>';
+        return;
+      }
+      resultsDiv.innerHTML = '';
+      teachers.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'list-item';
+        card.innerHTML = `
+          <strong>${t.name}</strong> <small>${t.department || ''}</small>
+          <div>Subjects: ${t.subjects?.join(', ') || '-'}</div>
+          <div>
+            <label>Choose date: <input type="date" class="apt-date" /></label>
+            <label>Time: <input type="time" class="apt-time" /></label>
+            <label>Purpose: <input class="apt-purpose" placeholder="purpose"/></label>
+            <button class="book-btn">Book</button>
+          </div>
+        `;
+        const btn = card.querySelector('.book-btn');
+        btn.onclick = async () => {
+          const date = card.querySelector('.apt-date').value;
+          const time = card.querySelector('.apt-time').value;
+          const purpose = card.querySelector('.apt-purpose').value;
+          if (!date || !time) return alert('Choose date and time');
+          await bookAppointment({
+            studentId: currentUser.uid,
+            studentName: currentUser.displayName || currentUser.email,
+            teacherId: t.id,
+            teacherName: t.name,
+            datetime: `${date}T${time}`,
+            purpose
+          });
+          alert('Appointment requested');
+        };
+        resultsDiv.appendChild(card);
+      });
+    }
+
+    let searchTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => renderTeachers(searchInput.value.trim()), 350);
+    });
+
+    async function loadMyAppointments() {
+      apptsDiv.innerHTML = '<p>Loading...</p>';
+      const unsubscribe = listenMyAppointments(currentUser.uid, (appts) => {
+        apptsDiv.innerHTML = '';
+        if (!appts.length) apptsDiv.innerHTML = '<p>No appointments yet.</p>';
+        appts.forEach(a => {
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `
+            <div><strong>${a.teacherName}</strong> — ${new Date(a.datetime).toLocaleString()}</div>
+            <div>Status: ${a.status}</div>
+            <div>Purpose: ${a.purpose || '-'}</div>
+          `;
+          apptsDiv.appendChild(item);
+        });
+      });
+    }
+
+    // initial load
+    renderTeachers('');
+  </script>
+</body>
+</html>

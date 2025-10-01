@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat Application</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <h2>Rooms</h2>
+      <ul id="roomList" class="room-list"></ul>
+
+      <div class="create-room">
+        <input id="newRoomInput" placeholder="New room name" />
+        <button id="createRoomBtn">Create</button>
+      </div>
+
+      <div class="username-block">
+        <input id="usernameInput" placeholder="Your username" />
+        <button id="setUsernameBtn">Set</button>
+      </div>
+    </aside>
+
+    <main class="chat-area">
+      <header class="chat-header">
+        <h3 id="currentRoomTitle">Not in a room</h3>
+        <div id="userList" class="user-list"></div>
+      </header>
+
+      <section id="messages" class="messages"></section>
+
+      <footer class="chat-input">
+        <input id="messageInput" placeholder="Type a message... (use *italic*, **bold**, and paste links)" />
+        <button id="sendBtn">Send</button>
+        <button id="leaveBtn" class="secondary">Leave Room</button>
+      </footer>
+    </main>
+  </div>
+
+  <script src="./server.js"></script>
+  <script src="./client.js"></script>
+</body>
+</html>

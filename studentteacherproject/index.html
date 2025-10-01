@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student-Teacher Booking — Login</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Firebase v9 (modular) CDN -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Student - Teacher Booking</h1>
+
+    <section class="card" id="auth-card">
+      <div id="auth-tabs">
+        <button id="tab-login" class="active">Login</button>
+        <button id="tab-register">Register</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <label>Email <input id="login-email" type="email" required /></label>
+        <label>Password <input id="login-password" type="password" required /></label>
+        <label>Role
+          <select id="login-role">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <button type="submit">Login</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden">
+        <label>Full name <input id="reg-name" required/></label>
+        <label>Email <input id="reg-email" type="email" required /></label>
+        <label>Password <input id="reg-password" type="password" required /></label>
+        <label>Role
+          <select id="reg-role">
+            <option value="student" selected>Student</option>
+            <option value="teacher">Teacher</option>
+            <!-- Admin accounts should be created manually by DB or special rule -->
+          </select>
+        </label>
+
+        <div id="teacher-extra" class="hidden">
+          <label>Department <input id="reg-dept" /></label>
+          <label>Subjects (comma-separated) <input id="reg-subjects" /></label>
+        </div>
+
+        <button type="submit">Register</button>
+        <p class="muted">Admin accounts are created by Admin only.</p>
+      </form>
+      <div id="auth-msg" class="muted"></div>
+    </section>
+
+    <footer class="muted">Built with Firebase • Replace firebaseConfig in <code>init-firebase.js</code></footer>
+  </main>
+
+  <script type="module" src="init-firebase.js"></script>
+  <script type="module" src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="topbar">
+    <span id="user-greet">Teacher</span>
+    <button id="logout">Logout</button>
+  </nav>
+
+  <main class="container">
+    <h2>Appointment Requests</h2>
+    <section class="card">
+      <div id="requests"></div>
+    </section>
+
+    <section class="card">
+      <h3>Messages</h3>
+      <div id="messages"></div>
+    </section>
+  </main>
+
+  <script type="module" src="init-firebase.js"></script>
+  <script type="module" src="db.js"></script>
+  <script type="module">
+    import { auth, onAuthStateChanged } from './auth-shared.js';
+    import { listenTeacherAppointments, updateAppointmentStatus, listenMessagesForTeacher } from './db.js';
+
+    let currentUser = null;
+    const greet = document.getElementById('user-greet');
+    const logout = document.getElementById('logout');
+    const requestsDiv = document.getElementById('requests');
+    const messagesDiv = document.getElementById('messages');
+
+    onAuthStateChanged(user => {
+      if (!user) return window.location = 'index.html';
+      currentUser = user;
+      greet.textContent = user.displayName || user.email;
+      listenTeacherAppointments(user.uid, renderRequests);
+      listenMessagesForTeacher(user.uid, renderMessages);
+    });
+
+    logout.onclick = async () => {
+      await auth.signOut();
+      window.location = 'index.html';
+    };
+
+    function renderRequests(list) {
+      requestsDiv.innerHTML = '';
+      if (!list.length) requestsDiv.innerHTML = '<p>No requests.</p>';
+      list.forEach(a => {
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `
+          <div><strong>${a.studentName}</strong> - ${new Date(a.datetime).toLocaleString()}</div>
+          <div>Purpose: ${a.purpose || '-'}</div>
+          <div>Status: ${a.status}</div>
+          <div>
+            <button class="approve">Approve</button>
+            <button class="cancel">Cancel</button>
+          </div>
+        `;
+        el.querySelector('.approve').onclick = () => updateAppointmentStatus(a.id, 'approved');
+        el.querySelector('.cancel').onclick = () => updateAppointmentStatus(a.id, 'cancelled');
+        requestsDiv.appendChild(el);
+      });
+    }
+
+    function renderMessages(msgs) {
+      messagesDiv.innerHTML = '';
+      if (!msgs.length) messagesDiv.innerHTML = '<p>No messages.</p>';
+      msgs.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'list-item';
+        el.innerHTML = `<div><strong>${m.fromName}</strong> - ${new Date(m.createdAt).toLocaleString()}</div>
+                        <div>${m.text}</div>`;
+        messagesDiv.appendChild(el);
+      });
+    }
+  </script>
+</body>
+</html>

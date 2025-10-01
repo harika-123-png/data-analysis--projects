@@ -1,0 +1,13 @@
+:root{--bg:#f7f8fb;--card:#fff;--muted:#666}
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+body{background:var(--bg);margin:0;padding:24px}
+.container{max-width:900px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
+.card{background:var(--card);padding:16px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.06);margin-bottom:16px}
+.auth-form label{display:block;margin:8px 0}
+input,select,button{padding:8px;border-radius:6px;border:1px solid #ddd}
+button{cursor:pointer}
+.hidden{display:none}
+.list-item{padding:10px;border-bottom:1px solid #eee}
+.muted{color:var(--muted);font-size:13px;margin-top:8px}
+#auth-tabs button{margin-right:8px;padding:6px 10px}

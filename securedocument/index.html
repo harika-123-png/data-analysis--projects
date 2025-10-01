@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Secure & Share Govt Document</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header><h1>Secure & Share Govt Documents</h1></header>
+
+    <main id="auth-area">
+      <!-- Register -->
+      <section id="register-section" class="card hidden">
+        <h2>Register</h2>
+        <input id="reg-name" placeholder="Full name" /><br><br>
+        <input id="reg-email" placeholder="Email" /><br><br>
+        <input id="reg-password" type="password" placeholder="Password" /><br><br>
+        <input id="reg-aadhaar" placeholder="Aadhaar number" /><br><br>
+        <input id="reg-phone" placeholder="+91xxxxxxxxxx" /><br><br>
+        <button id="btn-send-otp">Send OTP</button><br><br>
+        <div id="recaptcha-container"></div>
+        <input id="reg-otp" placeholder="Enter OTP" /><br><br>
+        <button id="btn-verify-otp">Verify & Register</button><br><br>
+        <p class="muted">Or <a id="show-login" href="#">login</a></p><br><br>
+      </section>
+
+      <!-- Login -->
+      <section id="login-section" class="card">
+        <h2>Login</h2>
+        <input id="login-email" placeholder="Email" /><br><br>
+        <input id="login-password" type="password" placeholder="Password" /><br><br>
+        <button id="btn-login">Login</button>
+        <p class="muted">Or <a id="show-register" href="#">register</a></p>
+      </section>
+    </main>
+
+    <main id="app-area" class="hidden">
+      <nav class="topbar">
+        <div id="welcome"></div>
+        <div>
+          <button id="btn-logout">Logout</button>
+        </div>
+      </nav>
+
+      <section class="grid">
+        <aside class="card">
+          <h3>Profile</h3>
+          <div id="profile-info"></div>
+          <button id="btn-edit-profile">Edit Profile</button>
+        </aside>
+
+        <section class="card wide">
+          <h3>Upload Document</h3>
+          <input type="file" id="file-input" />
+          <input id="doc-title" placeholder="Document title (e.g., PAN Card)" /><br><br>
+          <input id="doc-desc" placeholder="Short description" /><br><br>
+          <input id="share-aadhaar" placeholder="Share with Aadhaar (optional)" /><br><br>
+          <input id="share-email" placeholder="Share with email (optional)" /><br><br>
+          <button id="btn-upload">Upload</button><br>
+
+          <hr />
+          <h3>My Documents</h3>
+          <div id="docs-list"></div>
+        </section>
+
+        <aside class="card">
+          <h3>Activity Logs</h3>
+          <div id="logs-list" class="logs"></div>
+        </aside>
+      </section>
+    </main>
+
+    <footer>
+      <small>Project: Secure & Share Govt Documents — Built with Firebase</small>
+    </footer>
+  </div>
+
+  <!-- Firebase + App (ES modules) -->
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="storage.js"></script>
+  <script type="module" src="logger.js"></script>
+  <script type="module" src="ui.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
